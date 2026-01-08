@@ -189,7 +189,7 @@ GRANT SELECT ON TABLE public.view_upcoming_checkouts TO role_readonly;
 ## 2. Tabele (Gromadzenie Danych)
 
 ### Diagram ER
-![[diagram_er.png]]
+![Diagram ER](diagram_er.png)
 
 ### employees
 
