@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% block title %}Raporty – Hotel Aurora{% endblock %}
+{% block content %}
+
+<div class="mb-4">
+    <h2 class="mb-1"><i class="bi bi-bar-chart-line"></i> Raporty i statystyki</h2>
+    <p class="text-muted mb-0">Przegląd finansowy i statystyki obłożenia</p>
+</div>
+
+<div class="row g-4 mb-5">
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body text-center py-4">
+                <i class="bi bi-door-open fs-1 text-info mb-3 d-block"></i>
+                <h3 class="mb-1">{{ occupancy['occupied_rooms'] }} / {{ occupancy['total_rooms'] }}</h3>
+                <p class="text-muted mb-0">Pokoje zajęte</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body text-center py-4">
+                <i class="bi bi-pie-chart fs-1 text-primary mb-3 d-block"></i>
+                <h3 class="mb-1">{{ occupancy['occupancy_percentage']|round(1) }}%</h3>
+                <p class="text-muted mb-0">Obłożenie hotelu</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100 bg-warning">
+            <div class="card-body text-center py-4">
+                <i class="bi bi-door-closed fs-1 mb-3 d-block"></i>
+                <h3 class="mb-1">{{ occupancy['total_rooms'] - occupancy['occupied_rooms'] }}</h3>
+                <p class="mb-0">Pokoje wolne</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="mb-5">
+    <h3 class="mb-3"><i class="bi bi-cash-coin text-success"></i> Przychód miesięczny</h3>
+    <div class="card shadow">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>Miesiąc</th>
+                            <th>Rok</th>
+                            <th>Przychód</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for r in revenue %}
+                        <tr>
+                            <td>{{ r['month'] }}</td>
+                            <td>{{ r['year'] }}</td>
+                            <td><strong class="text-success">{{ r['total_revenue'] }} PLN</strong></td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="3" class="text-center py-4 text-muted">Brak danych</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div>
+    <h3 class="mb-3"><i class="bi bi-star text-warning"></i> Najlepsi goście</h3>
+    <div class="card shadow">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Gość</th>
+                            <th>Rezerwacji</th>
+                            <th>Łączna kwota</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for g in top_guests %}
+                        <tr>
+                            <td><span class="badge bg-warning">{{ loop.index }}</span></td>
+                            <td class="fw-medium">{{ g['first_name'] }} {{ g['last_name'] }}</td>
+                            <td>{{ g['total_stays'] }}</td>
+                            <td><strong class="text-success">{{ g['total_spent'] }} PLN</strong></td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="4" class="text-center py-4 text-muted">Brak danych</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

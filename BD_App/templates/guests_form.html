@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+{% block title %}{% if guest %}Edytuj gościa{% else %}Dodaj gościa{% endif %} – Hotel Aurora{% endblock %}
+{% block content %}
+
+<div class="mb-4">
+    <h2 class="mb-1">
+        <i class="bi bi-person-{{ 'gear' if guest else 'plus' }}"></i>
+        {% if guest %}Edytuj dane gościa{% else %}Dodaj nowego gościa{% endif %}
+    </h2>
+    <p class="text-muted mb-0">{% if guest %}Zaktualizuj informacje o gościu{% else %}Wprowadź dane nowego gościa{%
+        endif %}</p>
+</div>
+
+<div class="card shadow">
+    <div class="card-body p-4">
+        <form method="post" id="guestForm" novalidate>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">Imię <span class="text-danger">*</span></label>
+                    <input type="text" name="first_name" class="form-control form-control-lg"
+                        value="{{ guest['first_name'] if guest else '' }}" required minlength="2" maxlength="50"
+                        pattern="[A-Za-zĄąĆćĘęŁłŃńÓóŚśŹźŻż\s\-]+"
+                        title="Imię może zawierać tylko litery (min. 2 znaki)">
+                    <div class="invalid-feedback">Podaj poprawne imię (min. 2 litery)</div>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Nazwisko <span class="text-danger">*</span></label>
+                    <input type="text" name="last_name" class="form-control form-control-lg"
+                        value="{{ guest['last_name'] if guest else '' }}" required minlength="2" maxlength="50"
+                        pattern="[A-Za-zĄąĆćĘęŁłŃńÓóŚśŹźŻż\s\-]+"
+                        title="Nazwisko może zawierać tylko litery (min. 2 znaki)">
+                    <div class="invalid-feedback">Podaj poprawne nazwisko (min. 2 litery)</div>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Adres e-mail <span class="text-danger">*</span></label>
+                    <input type="email" name="email" class="form-control form-control-lg"
+                        value="{{ guest['email'] if guest else '' }}" required
+                        pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}" title="Podaj poprawny adres email">
+                    <div class="invalid-feedback">Podaj poprawny adres e-mail</div>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Telefon</label>
+                    <input type="tel" name="phone" class="form-control form-control-lg"
+                        value="{{ guest['phone'] if guest else '' }}" pattern="[\d\s\+\-]{9,15}"
+                        title="Numer telefonu: 9-15 cyfr, dozwolone: +, -, spacje">
+                    <div class="invalid-feedback">Podaj poprawny numer telefonu (9-15 cyfr)</div>
+                </div>
+                <div class="col-12">
+                    <label class="form-label">Adres</label>
+                    <input type="text" name="address" class="form-control form-control-lg"
+                        value="{{ guest['address'] if guest else '' }}" maxlength="200">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Numer dowodu / paszportu <span class="text-danger">*</span></label>
+                    <input type="text" name="id_number" class="form-control form-control-lg"
+                        value="{{ guest['id_number'] if guest else '' }}" required pattern="[A-Za-z0-9]{6,12}"
+                        minlength="6" maxlength="12" title="Numer dokumentu: 6-12 znaków alfanumerycznych"
+                        style="text-transform: uppercase;">
+                    <div class="invalid-feedback">Podaj poprawny numer dokumentu (6-12 znaków)</div>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Data urodzenia</label>
+                    <input type="date" name="date_of_birth" class="form-control form-control-lg"
+                        value="{{ guest['date_of_birth'] if guest and guest['date_of_birth'] else '' }}"
+                        max="{{ now().strftime('%Y-%m-%d') if now is defined else '' }}">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Narodowość</label>
+                    <input type="text" name="nationality" class="form-control form-control-lg"
+                        value="{{ guest['nationality'] if guest and guest['nationality'] else '' }}" maxlength="50"
+                        placeholder="np. Polska, Niemcy, Wielka Brytania">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Płeć</label>
+                    <select name="gender" class="form-select form-select-lg">
+                        <option value="">-- Wybierz --</option>
+                        <option value="male" {% if guest and guest['gender']=='male' %}selected{% endif %}>Mężczyzna
+                        </option>
+                        <option value="female" {% if guest and guest['gender']=='female' %}selected{% endif %}>Kobieta
+                        </option>
+                        <option value="other" {% if guest and guest['gender']=='other' %}selected{% endif %}>Inna
+                        </option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="d-flex gap-3 mt-4 pt-3 border-top border-secondary">
+                <button type="submit" class="btn btn-success btn-lg">
+                    <i class="bi bi-check-lg"></i> Zapisz
+                </button>
+                <a href="{{ url_for('guests_list') }}" class="btn btn-secondary btn-lg">
+                    <i class="bi bi-x-lg"></i> Anuluj
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.getElementById('guestForm').addEventListener('submit', function (e) {
+        if (!this.checkValidity()) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        this.classList.add('was-validated');
+    });
+
+    document.querySelector('input[name="id_number"]').addEventListener('input', function () {
+        this.value = this.value.toUpperCase();
+    });
+</script>
+
+{% endblock %}

@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% block title %}Dodaj pracownika – Hotel Aurora{% endblock %}
+{% block content %}
+
+<div class="mb-4">
+    <h2 class="mb-1">
+        <i class="bi bi-person-plus"></i> Dodaj nowego pracownika
+    </h2>
+    <p class="text-muted mb-0">Wprowadź dane nowego członka zespołu</p>
+</div>
+
+<div class="card shadow">
+    <div class="card-body p-4">
+        <form method="post" id="employeeForm" novalidate>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">Imię <span class="text-danger">*</span></label>
+                    <input type="text" name="first_name" class="form-control form-control-lg"
+                        value="{{ form_data.first_name if form_data else '' }}" required minlength="2" maxlength="50"
+                        pattern="[A-Za-zĄąĆćĘęŁłŃńÓóŚśŹźŻż\s\-]+"
+                        title="Imię może zawierać tylko litery (min. 2 znaki)">
+                    <div class="invalid-feedback">Podaj poprawne imię (min. 2 litery)</div>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Nazwisko <span class="text-danger">*</span></label>
+                    <input type="text" name="last_name" class="form-control form-control-lg"
+                        value="{{ form_data.last_name if form_data else '' }}" required minlength="2" maxlength="50"
+                        pattern="[A-Za-zĄąĆćĘęŁłŃńÓóŚśŹźŻż\s\-]+"
+                        title="Nazwisko może zawierać tylko litery (min. 2 znaki)">
+                    <div class="invalid-feedback">Podaj poprawne nazwisko (min. 2 litery)</div>
+                </div>
+
+                <div class="col-12">
+                    <label class="form-label">Adres e-mail (Login bazy danych) <span
+                            class="text-danger">*</span></label>
+                    <input type="email" name="email" class="form-control form-control-lg"
+                        value="{{ form_data.email if form_data else '' }}" required
+                        pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}" title="Podaj poprawny adres email">
+                    <div class="form-text">Adres e-mail będzie używany jako login do systemu.</div>
+                    <div class="invalid-feedback">Podaj poprawny adres e-mail</div>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Hasło tymczasowe <span class="text-danger">*</span></label>
+                    <input type="password" name="password" class="form-control form-control-lg" required minlength="8"
+                        pattern="(?=.*[a-zA-Z])(?=.*\d).{8,}"
+                        title="Hasło musi mieć min. 8 znaków, zawierać literę i cyfrę">
+                    <div class="form-text">Min. 8 znaków, musi zawierać literę i cyfrę</div>
+                    <div class="invalid-feedback">Hasło musi mieć min. 8 znaków, literę i cyfrę</div>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Stanowisko <span class="text-danger">*</span></label>
+                    <select name="position" class="form-select form-select-lg" required>
+                        <option value="">Wybierz stanowisko...</option>
+                        <option value="receptionist" {% if form_data and form_data.position=='receptionist' %}selected{%
+                            endif %}>Recepcjonista</option>
+                        <option value="manager" {% if form_data and form_data.position=='manager' %}selected{% endif %}>
+                            Menedżer</option>
+                        <option value="accounting" {% if form_data and form_data.position=='accounting' %}selected{%
+                            endif %}>Księgowy</option>
+                        <option value="cleaning" {% if form_data and form_data.position=='cleaning' %}selected{% endif
+                            %}>Sprzątacz/Sprzątaczka</option>
+                    </select>
+                    <div class="form-text">Stanowisko określa automatycznie uprawnienia w bazie danych.</div>
+                    <div class="invalid-feedback">Wybierz stanowisko</div>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Telefon</label>
+                    <input type="tel" name="phone" class="form-control form-control-lg"
+                        value="{{ form_data.phone if form_data else '' }}" pattern="[\d\s\+\-]{9,15}"
+                        title="Numer telefonu: 9-15 cyfr">
+                    <div class="invalid-feedback">Podaj poprawny numer telefonu (9-15 cyfr)</div>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Data zatrudnienia <span class="text-danger">*</span></label>
+                    <input type="date" name="hire_date" class="form-control form-control-lg"
+                        value="{{ form_data.hire_date if form_data else '' }}" required
+                        >
+                    <div class="invalid-feedback">Podaj datę zatrudnienia</div>
+                </div>
+            </div>
+
+            <div class="d-flex gap-3 mt-4 pt-3 border-top border-secondary">
+                <button type="submit" class="btn btn-success btn-lg">
+                    <i class="bi bi-person-plus"></i> Dodaj pracownika
+                </button>
+                <a href="{{ url_for('list_employees') }}" class="btn btn-secondary btn-lg">
+                    <i class="bi bi-x-lg"></i> Anuluj
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.getElementById('employeeForm').addEventListener('submit', function (e) {
+        if (!this.checkValidity()) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        this.classList.add('was-validated');
+    });
+</script>
+
+{% endblock %}

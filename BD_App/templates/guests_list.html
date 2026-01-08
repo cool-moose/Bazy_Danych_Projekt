@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block title %}Goście – Hotel Aurora{% endblock %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+    <div>
+        <h2 class="mb-1"><i class="bi bi-people"></i> Lista gości</h2>
+        <p class="text-muted mb-0">Zarządzaj danymi gości hotelowych</p>
+    </div>
+    {% if 'receptionist' in current_user.role|lower or 'manager' in current_user.role|lower %}
+    <a href="{{ url_for('guests_add') }}" class="btn btn-success btn-lg">
+        <i class="bi bi-person-plus"></i> Dodaj gościa
+    </a>
+    {% endif %}
+</div>
+
+<div class="card shadow">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Imię</th>
+                        <th>Nazwisko</th>
+                        <th>E-mail</th>
+                        <th>Telefon</th>
+                        <th>Narodowość</th>
+                        <th>Płeć</th>
+                        <th>Akcje</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for g in guests %}
+                    <tr>
+                        <td><span class="text-primary fw-bold">#{{ g['guest_id'] }}</span></td>
+                        <td>{{ g['first_name'] }}</td>
+                        <td class="fw-medium">{{ g['last_name'] }}</td>
+                        <td><a href="mailto:{{ g['email'] }}">{{ g['email'] }}</a></td>
+                        <td>{{ g['phone'] or '–' }}</td>
+                        <td>{{ g['nationality'] or '–' }}</td>
+                        <td>
+                            {% if g['gender'] == 'male' %}
+                            <span class="badge bg-info">M</span>
+                            {% elif g['gender'] == 'female' %}
+                            <span class="badge bg-danger">K</span>
+                            {% elif g['gender'] == 'other' %}
+                            <span class="badge bg-secondary">I</span>
+                            {% else %}
+                            –
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{{ url_for('guest_history', guest_id=g['guest_id']) }}"
+                                class="btn btn-sm btn-outline-success">
+                                <i class="bi bi-clock-history"></i> Historia
+                            </a>
+                            {% if 'receptionist' in current_user.role|lower or 'manager' in current_user.role|lower %}
+                            <a href="{{ url_for('guests_edit', guest_id=g['guest_id']) }}"
+                                class="btn btn-sm btn-primary">
+                                <i class="bi bi-pencil"></i> Edytuj
+                            </a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="8" class="text-center py-5 text-muted">
+                            <i class="bi bi-person-x fs-1 d-block mb-2"></i>
+                            Brak gości w bazie danych
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

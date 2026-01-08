@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+{% block title %}Nowa rezerwacja – Hotel Aurora{% endblock %}
+{% block content %}
+
+<div class="mb-4">
+    <h2 class="mb-1"><i class="bi bi-calendar-plus"></i> Nowa rezerwacja</h2>
+    <p class="text-muted mb-0">Utwórz nową rezerwację dla gościa</p>
+</div>
+
+<div class="card shadow">
+    <div class="card-body p-4">
+        <form method="post" id="reservationForm" novalidate>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">Gość <span class="text-danger">*</span></label>
+                    <select name="guest_id" id="guest_id" class="form-select form-select-lg" required>
+                        <option value="">Wybierz gościa...</option>
+                        {% for g in guests %}
+                        <option value="{{ g[0] }}" {% if form_data and form_data.guest_id|int==g[0] %}selected{% endif
+                            %}>
+                            {{ g[1] }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                    <div class="invalid-feedback">Wybierz gościa</div>
+
+                    <!-- Rabat lojalnościowy -->
+                    <div id="discount-info" class="mt-2" style="display: none;">
+                        <div class="alert alert-success py-2 mb-0">
+                            <i class="bi bi-star-fill text-warning"></i>
+                            <span id="discount-message">Ładowanie...</span>
+                        </div>
+                    </div>
+                    <div id="no-discount-info" class="mt-2" style="display: none;">
+                        <div class="alert alert-light py-2 mb-0">
+                            <i class="bi bi-info-circle"></i>
+                            <span>Nowy gość - brak rabatu lojalnościowego</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Pokój <span class="text-danger">*</span></label>
+                    <select name="room_id" class="form-select form-select-lg" required>
+                        <option value="">Wybierz pokój...</option>
+                        {% for r in rooms %}
+                        <option value="{{ r[0] }}" {% if form_data and form_data.room_id|int==r[0] %}selected{% endif
+                            %}>
+                            {{ r[1] }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                    <div class="invalid-feedback">Wybierz pokój</div>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Data zameldowania <span class="text-danger">*</span></label>
+                    <input type="date" name="check_in" id="check_in" class="form-control form-control-lg"
+                        value="{{ form_data.check_in if form_data else '' }}" required>
+                    <div class="invalid-feedback">Podaj datę zameldowania</div>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Data wymeldowania <span class="text-danger">*</span></label>
+                    <input type="date" name="check_out" id="check_out" class="form-control form-control-lg"
+                        value="{{ form_data.check_out if form_data else '' }}" required>
+                    <div class="invalid-feedback">Podaj datę wymeldowania</div>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Liczba gości <span class="text-danger">*</span></label>
+                    <input type="number" name="number_of_guests" class="form-control form-control-lg"
+                        value="{{ form_data.number_of_guests if form_data else '1' }}" min="1" max="20" required>
+                    <div class="invalid-feedback">Podaj liczbę gości (1-20)</div>
+                </div>
+            </div>
+
+            <div class="d-flex gap-3 mt-4 pt-3 border-top border-secondary">
+                <button type="submit" class="btn btn-success btn-lg">
+                    <i class="bi bi-check-lg"></i> Utwórz rezerwację
+                </button>
+                <a href="{{ url_for('dashboard') }}" class="btn btn-secondary btn-lg">
+                    <i class="bi bi-x-lg"></i> Anuluj
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('check_in').setAttribute('min', today);
+
+    document.getElementById('guest_id').addEventListener('change', function() {
+        const guestId = this.value;
+        const discountInfo = document.getElementById('discount-info');
+        const noDiscountInfo = document.getElementById('no-discount-info');
+        const discountMessage = document.getElementById('discount-message');
+
+        discountInfo.style.display = 'none';
+        noDiscountInfo.style.display = 'none';
+
+        if (!guestId) return;
+
+        fetch(`/api/guest/${guestId}/discount`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.discount_percent > 0) {
+                    discountMessage.textContent = `🎉 ${data.discount_percent}% rabatu lojalnościowego (${data.past_stays} poprzednich pobytów)`;
+                    discountInfo.style.display = 'block';
+                } else {
+                    noDiscountInfo.style.display = 'block';
+                }
+            })
+            .catch(error => {
+                console.error('Błąd pobierania rabatu:', error);
+            });
+    });
+
+    document.getElementById('check_in').addEventListener('change', function () {
+        const checkIn = this.value;
+        const checkOutInput = document.getElementById('check_out');
+
+        if (checkIn) {
+            const nextDay = new Date(checkIn);
+            nextDay.setDate(nextDay.getDate() + 1);
+            checkOutInput.min = nextDay.toISOString().split('T')[0];
+
+            if (checkOutInput.value && checkOutInput.value <= checkIn) {
+                checkOutInput.value = '';
+            }
+        }
+    });
+
+    document.getElementById('reservationForm').addEventListener('submit', function (e) {
+        const checkIn = new Date(document.getElementById('check_in').value);
+        const checkOut = new Date(document.getElementById('check_out').value);
+
+        if (checkOut <= checkIn) {
+            e.preventDefault();
+            document.getElementById('check_out').setCustomValidity('Data wymeldowania musi być późniejsza niż zameldowania');
+        } else {
+            document.getElementById('check_out').setCustomValidity('');
+        }
+
+        if (!this.checkValidity()) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        this.classList.add('was-validated');
+    });
+</script>
+
+{% endblock %}

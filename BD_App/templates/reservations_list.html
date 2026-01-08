@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+{% block title %}Rezerwacje – Hotel Aurora{% endblock %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+    <div>
+        <h2 class="mb-1"><i class="bi bi-calendar3"></i> Wszystkie rezerwacje</h2>
+        <p class="text-muted mb-0">Pełna lista rezerwacji hotelowych</p>
+    </div>
+    {% if 'receptionist' in current_user.role|lower or 'manager' in current_user.role|lower %}
+    <a href="{{ url_for('new_reservation') }}" class="btn btn-success btn-lg">
+        <i class="bi bi-plus-lg"></i> Nowa rezerwacja
+    </a>
+    {% endif %}
+</div>
+
+<div class="card shadow">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Gość</th>
+                        <th>Pokój</th>
+                        <th>Check-in</th>
+                        <th>Check-out</th>
+                        <th>Kwota</th>
+                        <th>Status</th>
+                        <th>Akcje</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for r in reservations %}
+                    <tr>
+                        <td><span class="text-primary fw-bold">#{{ r['reservation_id'] }}</span></td>
+                        <td>
+                            <a href="{{ url_for('guest_history', guest_id=r['guest_id']) }}" class="fw-medium">
+                                {{ r['guest_name'] }}
+                            </a>
+                        </td>
+                        <td><span class="badge bg-info">{{ r['room_number'] }}</span></td>
+                        <td>{{ r['check_in_date'] }}</td>
+                        <td>{{ r['check_out_date'] }}</td>
+                        <td><strong>{{ r['total_cost'] }} PLN</strong></td>
+                        <td>
+                            {% if r['reservation_status'] == 'checked_in' %}
+                            <span class="badge bg-success">Zameldowany</span>
+                            {% elif r['reservation_status'] == 'confirmed' %}
+                            <span class="badge bg-warning">Potwierdzona</span>
+                            {% elif r['reservation_status'] == 'completed' %}
+                            <span class="badge bg-secondary">Zakończona</span>
+                            {% elif r['reservation_status'] == 'cancelled' %}
+                            <span class="badge bg-danger">Anulowana</span>
+                            {% else %}
+                            <span class="badge bg-secondary">{{ r['reservation_status'] }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if r['reservation_status'] == 'confirmed' %}
+                            <a href="{{ url_for('checkin', res_id=r['reservation_id']) }}"
+                                class="btn btn-sm btn-primary">
+                                <i class="bi bi-box-arrow-in-right"></i> Zamelduj
+                            </a>
+                            <a href="{{ url_for('pay_reservation', res_id=r['reservation_id']) }}"
+                                class="btn btn-sm btn-outline-warning">
+                                <i class="bi bi-cash"></i> Opłać
+                            </a>
+                            <a href="{{ url_for('cancel_reservation', res_id=r['reservation_id']) }}"
+                                class="btn btn-sm btn-outline-danger"
+                                onclick="return confirm('Czy na pewno chcesz anulować tę rezerwację?');">
+                                <i class="bi bi-x-lg"></i> Anuluj
+                            </a>
+                            {% elif r['reservation_status'] == 'checked_in' %}
+                            <a href="{{ url_for('checkout', res_id=r['reservation_id']) }}"
+                                class="btn btn-sm btn-outline-danger">
+                                <i class="bi bi-box-arrow-right"></i> Wymelduj
+                            </a>
+                            <a href="{{ url_for('pay_reservation', res_id=r['reservation_id']) }}"
+                                class="btn btn-sm btn-outline-warning">
+                                <i class="bi bi-cash"></i> Opłać
+                            </a>
+                            <a href="{{ url_for('add_service', res_id=r['reservation_id']) }}"
+                                class="btn btn-sm btn-outline-success">
+                                <i class="bi bi-plus"></i> Usługa
+                            </a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="8" class="text-center py-5 text-muted">
+                            <i class="bi bi-calendar-x fs-1 d-block mb-2"></i>
+                            Brak rezerwacji w systemie
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

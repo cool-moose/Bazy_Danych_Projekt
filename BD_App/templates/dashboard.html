@@ -1,0 +1,211 @@
+{% extends "base.html" %}
+{% block title %}Dashboard – Hotel Aurora{% endblock %}
+{% block content %}
+
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div>
+                <h2 class="mb-1">
+                    <i class="bi bi-calendar2-week"></i>
+                    Panel Rezerwacji
+                </h2>
+                <p class="text-muted mb-0">
+                    Witaj, <span class="text-primary fw-semibold">{{ current_user.id|upper }}</span> –
+                    zarządzaj rezerwacjami i operacjami hotelu
+                </p>
+            </div>
+            {% if 'receptionist' in current_user.role|lower or 'manager' in current_user.role|lower %}
+            <a href="{{ url_for('new_reservation') }}" class="btn btn-success btn-lg">
+                <i class="bi bi-plus-circle"></i> Nowa Rezerwacja
+            </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{% if 'manager' in current_user.role|lower %}
+<div class="row mb-4 g-3">
+    <div class="col-6 col-md-3">
+        <div class="stat-card">
+            <i class="bi bi-calendar-check stat-icon"></i>
+            <div class="stat-value">{{ reservations|length }}</div>
+            <div class="stat-label">Aktywne rezerwacje</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat-card">
+            <i class="bi bi-door-open stat-icon"></i>
+            <div class="stat-value">{{ cleaning_rooms|length if cleaning_rooms else 0 }}</div>
+            <div class="stat-label">Do sprzątania</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat-card">
+            <i class="bi bi-person-check stat-icon"></i>
+            <div class="stat-value">{{ reservations|selectattr('reservation_status', 'equalto',
+                'checked_in')|list|length }}</div>
+            <div class="stat-label">Zameldowani</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat-card">
+            <i class="bi bi-clock-history stat-icon"></i>
+            <div class="stat-value">{{ reservations|selectattr('reservation_status', 'equalto', 'confirmed')|list|length
+                }}</div>
+            <div class="stat-label">Oczekujące</div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<div class="card shadow mb-5">
+    <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <h5 class="mb-0">
+            <i class="bi bi-list-ul text-primary me-2"></i>
+            Aktywne Rezerwacje
+        </h5>
+        <span class="badge bg-info">{{ reservations|length }} łącznie</span>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Gość</th>
+                        <th>Pokój</th>
+                        <th>Zameldowanie</th>
+                        <th>Wymeldowanie</th>
+                        <th>Kwota</th>
+                        <th>Status</th>
+                        <th class="text-end">Akcje</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for r in reservations %}
+                    <tr>
+                        <td>
+                            <strong class="text-primary">#{{ r['reservation_id'] }}</strong>
+                        </td>
+                        <td>
+                            <a href="{{ url_for('guest_history', guest_id=r['guest_id']) }}" class="fw-medium">
+                                <i class="bi bi-person-circle me-1 opacity-50"></i>
+                                {{ r['guest_name'] }}
+                            </a>
+                        </td>
+                        <td>
+                            <span class="badge bg-info">
+                                <i class="bi bi-door-closed me-1"></i>{{ r['room_number'] }}
+                            </span>
+                        </td>
+                        <td>
+                            <i class="bi bi-calendar-event me-1 text-muted small"></i>
+                            {{ r['check_in_date'] }}
+                        </td>
+                        <td>
+                            <i class="bi bi-calendar-x me-1 text-muted small"></i>
+                            {{ r['check_out_date'] }}
+                        </td>
+                        <td>
+                            <strong class="text-success">{{ r['total_cost'] }} PLN</strong>
+                        </td>
+                        <td>
+                            {% if r['reservation_status'] == 'checked_in' %}
+                            <span class="badge bg-success">
+                                <i class="bi bi-check-circle me-1"></i>Zameldowany
+                            </span>
+                            {% elif r['reservation_status'] == 'confirmed' %}
+                            <span class="badge bg-warning">
+                                <i class="bi bi-hourglass-split me-1"></i>Potwierdzona
+                            </span>
+                            {% else %}
+                            <span class="badge bg-secondary">{{ r['reservation_status'] }}</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-end">
+                            <div class="d-flex gap-1 justify-content-end">
+                                {% if r['reservation_status'] == 'confirmed' %}
+                                <a href="{{ url_for('checkin', res_id=r['reservation_id']) }}"
+                                    class="btn btn-sm btn-primary" title="Zamelduj gościa">
+                                    <i class="bi bi-box-arrow-in-right"></i>
+                                    <span class="d-none d-lg-inline">Zamelduj</span>
+                                </a>
+                                {% elif r['reservation_status'] == 'checked_in' %}
+                                <a href="{{ url_for('add_service', res_id=r['reservation_id']) }}"
+                                    class="btn btn-sm btn-outline-success" title="Dodaj usługę">
+                                    <i class="bi bi-plus-lg"></i>
+                                    <span class="d-none d-xl-inline">Usługa</span>
+                                </a>
+                                <a href="{{ url_for('checkout', res_id=r['reservation_id']) }}"
+                                    class="btn btn-sm btn-outline-danger" title="Wymelduj gościa">
+                                    <i class="bi bi-box-arrow-right"></i>
+                                    <span class="d-none d-lg-inline">Wymelduj</span>
+                                </a>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="8" class="text-center py-5">
+                            <div class="py-4">
+                                <i class="bi bi-calendar-x" style="font-size: 3rem; opacity: 0.3;"></i>
+                                <h5 class="mt-3 mb-2 text-muted">Brak aktywnych rezerwacji</h5>
+                                <p class="text-muted small mb-0">Wszystkie rezerwacje zostały zakończone</p>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% if 'cleaning' in current_user.role or 'manager' in current_user.role %}
+<div class="mt-5">
+    <div class="d-flex align-items-center gap-3 mb-4">
+        <h3 class="mb-0">
+            <i class="bi bi-droplet-half text-primary"></i>
+            Pokoje do sprzątania
+        </h3>
+        {% if cleaning_rooms %}
+        <span class="badge bg-warning" style="font-size: 0.9rem;">
+            {{ cleaning_rooms|length }} pokoi
+        </span>
+        {% endif %}
+    </div>
+
+    {% if cleaning_rooms %}
+    <div class="row g-4">
+        {% for room in cleaning_rooms %}
+        <div class="col-sm-6 col-md-4 col-lg-3">
+            <div class="card bg-warning text-dark h-100">
+                <div class="card-body text-center py-4">
+                    <i class="bi bi-door-closed" style="font-size: 2.5rem;"></i>
+                    <h5 class="mt-3 mb-1">Pokój {{ room['room_number'] }}</h5>
+                    <p class="mb-3 small opacity-75">
+                        <i class="bi bi-tag me-1"></i>{{ room['room_type']|capitalize }}
+                    </p>
+                    <a href="{{ url_for('room_cleaned', room_id=room['room_id']) }}" class="btn btn-dark">
+                        <i class="bi bi-check-lg me-1"></i> Oznacz jako czysty
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="card">
+        <div class="card-body text-center py-5">
+            <i class="bi bi-emoji-smile" style="font-size: 3rem; color: var(--success);"></i>
+            <h5 class="mt-3 mb-2" style="color: var(--success);">Wszystkie pokoje są czyste!</h5>
+            <p class="text-muted mb-0">Nie ma pokojów wymagających sprzątania.</p>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endif %}
+
+{% endblock %}

@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block title %}Logowanie – Hotel Aurora{% endblock %}
+{% block content %}
+<div class="row justify-content-center align-items-center" style="min-height: 80vh;">
+    <div class="col-md-5 col-lg-4">
+        <div class="card login-card">
+            <div class="card-header text-center">
+                <div class="mb-3">
+                    <i class="bi bi-stars text-gold" style="font-size: 3rem;"></i>
+                </div>
+                <h3 class="mb-1">Hotel Aurora</h3>
+                <p class="text-muted small text-uppercase" style="letter-spacing: 2px;">Premium Management</p>
+            </div>
+            <div class="card-body px-4 pb-4">
+                <form method="post" autocomplete="off">
+                    <div class="mb-4">
+                        <label class="form-label text-uppercase small fw-bold">Adres Email</label>
+                        <div class="input-group">
+                            <span class="input-group-text border-end-0">
+                                <i class="bi bi-envelope"></i>
+                            </span>
+                            <input type="email" name="username" class="form-control border-start-0 ps-0"
+                                placeholder="nazwa@hotel.com" required autofocus>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label text-uppercase small fw-bold">Hasło</label>
+                        <div class="input-group">
+                            <span class="input-group-text border-end-0">
+                                <i class="bi bi-lock"></i>
+                            </span>
+                            <input type="password" name="password" class="form-control border-start-0 ps-0"
+                                placeholder="••••••••" required id="password-input">
+                            <button type="button" class="input-group-text border-start-0" onclick="togglePassword()"
+                                style="cursor: pointer;">
+                                <i class="bi bi-eye" id="toggle-password-icon"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100 py-3 mt-2">
+                        ZALOGUJ SIĘ
+                    </button>
+                </form>
+            </div>
+        </div>
+        <div class="text-center mt-4">
+            <p class="text-muted small opacity-50">
+                <i class="bi bi-shield-lock me-1"></i> Secured by Aurora System
+            </p>
+        </div>
+    </div>
+</div>
+
+<script>
+    function togglePassword() {
+        const passwordInput = document.getElementById('password-input');
+        const toggleIcon = document.getElementById('toggle-password-icon');
+
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            toggleIcon.classList.remove('bi-eye');
+            toggleIcon.classList.add('bi-eye-slash');
+        } else {
+            passwordInput.type = 'password';
+            toggleIcon.classList.remove('bi-eye-slash');
+            toggleIcon.classList.add('bi-eye');
+        }
+    }
+</script>
+{% endblock %}
