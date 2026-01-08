@@ -41,6 +41,10 @@ GRANT ALL ON TABLE public.view_revenue_report TO role_manager;
 GRANT ALL ON TABLE public.view_upcoming_checkouts TO role_manager;
 ```
 
+---
+
+<div style="break-after: page;"></div>
+
 ### role_receptionist
 
 #### Opis:
@@ -88,6 +92,10 @@ GRANT SELECT,INSERT,UPDATE ON TABLE public.view_revenue_report TO role_reception
 GRANT SELECT,INSERT,UPDATE ON TABLE public.view_upcoming_checkouts TO role_receptionist;
 ```
 
+---
+
+<div style="break-after: page;"></div>
+
 ### role_accountant
 
 #### Opis:
@@ -114,6 +122,10 @@ GRANT SELECT ON TABLE public.view_revenue_report TO role_accountant;
 GRANT SELECT ON TABLE public.view_upcoming_checkouts TO role_accountant;
 ```
 
+---
+
+<div style="break-after: page;"></div>
+
 ### role_cleaning
 
 #### Opis:
@@ -130,6 +142,10 @@ GRANT UPDATE(status) ON TABLE public.rooms TO role_cleaning;
 GRANT SELECT ON TABLE public.guests TO role_cleaning;
 GRANT SELECT ON TABLE public.reservations TO role_cleaning;
 ```
+
+---
+
+<div style="break-after: page;"></div>
 
 ### role_readonly
 
@@ -166,7 +182,14 @@ GRANT SELECT ON TABLE public.view_revenue_report TO role_readonly;
 GRANT SELECT ON TABLE public.view_upcoming_checkouts TO role_readonly;
 ```
 
+---
+
+<div style="break-after: page;"></div>
+
 ## 2. Tabele (Gromadzenie Danych)
+
+### Diagram ER
+![[diagram_er.png]]
 
 ### employees
 
@@ -190,6 +213,10 @@ CREATE TABLE public.employees (
     CONSTRAINT check_phone_format CHECK (((phone)::text ~ '^[0-9]+$'::text))
 );
 ```
+
+---
+
+<div style="break-after: page;"></div>
 
 ### guests
 
@@ -218,6 +245,10 @@ CREATE TABLE public.guests (
 );
 ```
 
+---
+
+<div style="break-after: page;"></div>
+
 ### rooms
 
 #### Opis:
@@ -229,16 +260,20 @@ Pokoje hotelowe. Każdy pokój ma typ, cenę za noc, pojemność oraz **status**
 ```SQL
 CREATE TABLE public.rooms (
     room_id integer NOT NULL,
-    room_number integer NOT NULL,
+    room_number character varying(10) NOT NULL,
     room_type character varying(20) NOT NULL,
     price_per_night numeric(10,2) NOT NULL,
     status character varying(20) NOT NULL,
     capacity integer NOT NULL,
     CONSTRAINT check_capacity_positive CHECK ((capacity > 0)),
-    CONSTRAINT check_room_type CHECK (((room_type)::text = ANY ((ARRAY['single'::character varying, 'double'::character varying, 'twin'::character varying, 'triple'::character varying, 'quad'::character varying, 'family'::character varying, 'junior suite'::character varying, 'suite'::character varying, 'presidential suite'::character varying, 'honeymoon suite'::character varying, 'penthouse'::character varying, 'accessible room'::character varying])::text[]))),
     CONSTRAINT valid_room_status CHECK (((status)::text = ANY (ARRAY[('free'::character varying)::text, ('cleaning'::character varying)::text, ('occupied'::character varying)::text, ('reserved'::character varying)::text, ('maintenance'::character varying)::text])))
 );
+
 ```
+
+---
+
+<div style="break-after: page;"></div>
 
 ### reservations
 
@@ -262,9 +297,14 @@ CREATE TABLE public.reservations (
     CONSTRAINT check_cost CHECK ((total_cost >= (0)::numeric)),
     CONSTRAINT check_dates CHECK ((check_out_date > check_in_date)),
     CONSTRAINT check_number_of_guests CHECK ((number_of_guests > 0)),
-    CONSTRAINT check_reservation_status CHECK (((reservation_status)::text = ANY ((ARRAY['checked_in'::character varying, 'completed'::character varying, 'confirmed'::character varying, 'cancelled'::character varying])::text[])))
+    CONSTRAINT check_reservation_status CHECK (((reservation_status)::text = ANY (ARRAY[('checked_in'::character varying)::text, ('checked_out'::character varying)::text, ('confirmed'::character varying)::text, ('cancelled'::character varying)::text])))
 );
+
 ```
+
+---
+
+<div style="break-after: page;"></div>
 
 ### services
 
@@ -283,6 +323,10 @@ CREATE TABLE public.services (
     CONSTRAINT check_price_positive CHECK ((price > (0)::numeric))
 );
 ```
+
+---
+
+<div style="break-after: page;"></div>
 
 ### service_orders
 
@@ -307,6 +351,10 @@ CREATE TABLE public.service_orders (
 );
 ```
 
+---
+
+<div style="break-after: page;"></div>
+
 ### payments
 
 #### Opis:
@@ -329,6 +377,8 @@ CREATE TABLE public.payments (
 ```
 
 ---
+
+<div style="break-after: page;"></div>
 
 ## 3. Triggery (Automatyzacja i Walidacja)
 
@@ -371,6 +421,10 @@ END;
 $$;
 ```
 
+---
+
+<div style="break-after: page;"></div>
+
 #### trg_prevent_overlapping_reservations
 
 ```SQL
@@ -395,6 +449,10 @@ BEGIN
 END;
 $$;
 ```
+
+---
+
+<div style="break-after: page;"></div>
 
 #### trg_validate_guest_capacity
 
@@ -422,6 +480,10 @@ END;
 $$;
 ```
 
+---
+
+<div style="break-after: page;"></div>
+
 #### trg_update_room_status_on_checkin
 
 ```SQL
@@ -444,6 +506,10 @@ END;
 $$;
 ```
 
+---
+
+<div style="break-after: page;"></div>
+
 #### trg_update_room_status_on_checkout
 
 ```SQL
@@ -465,6 +531,10 @@ BEGIN
 END;
 $$;
 ```
+
+---
+
+<div style="break-after: page;"></div>
 
 #### trg_update_service_order_total
 
@@ -490,6 +560,8 @@ $$;
 ```
 
 ---
+
+<div style="break-after: page;"></div>
 
 ## 4. Procedury Składowane
 
@@ -571,6 +643,10 @@ END;
 $$;
 ```
 
+---
+
+<div style="break-after: page;"></div>
+
 ### checkout(reservation_id)
 
 - Obsługuje proces wymeldowania.
@@ -614,6 +690,10 @@ BEGIN
 END;
 $$;
 ```
+
+---
+
+<div style="break-after: page;"></div>
 
 ### cancel_reservation(reservation_id)
 
@@ -661,6 +741,10 @@ BEGIN
 END;
 $$;
 ```
+
+---
+
+<div style="break-after: page;"></div>
 
 ### add_service_to_reservation(...)
 
@@ -719,6 +803,10 @@ END;
 $$;
 ```
 
+---
+
+<div style="break-after: page;"></div>
+
 ### process_payment(...)
 
 - Rejestruje wpłatę w systemie.
@@ -763,6 +851,10 @@ END;
 $$;
 ```
 
+---
+
+<div style="break-after: page;"></div>
+
 ### room_cleaned(room_id)
 
 - Procedura dla serwisu sprzątającego.
@@ -783,6 +875,10 @@ BEGIN
 END;
 $$;
 ```
+
+---
+
+<div style="break-after: page;"></div>
 
 ### create_db_user_and_employee(...)
 
@@ -849,6 +945,10 @@ END;
 $$;
 ```
 
+---
+
+<div style="break-after: page;"></div>
+
 ### delete_db_role(...)
 
 - Pozwala na usunięcie roli użytkownika bazy
@@ -870,6 +970,8 @@ $$;
 ```
 
 ---
+
+<div style="break-after: page;"></div>
 
 ## 5. Funkcje Pomocnicze
 
@@ -895,6 +997,10 @@ CREATE FUNCTION public.get_room_availability(p_room_id integer, p_check_in_date 
     );
 $$;
 ```
+
+---
+
+<div style="break-after: page;"></div>
 
 ### calculate_reservation_cost(...)
 
@@ -928,6 +1034,10 @@ END;
 $$;
 ```
 
+---
+
+<div style="break-after: page;"></div>
+
 ### get_guest_loyalty_discount(...)
 
 Oblicza zniżkę lojalnościową na podstawie liczby przeszłych wizyt gościa.
@@ -957,6 +1067,10 @@ END;
 $$;
 ```
 
+---
+
+<div style="break-after: page;"></div>
+
 ### calculate_total_with_services(p_reservation_id)
 
 Zwraca koszt pobytu wraz z usługami
@@ -977,6 +1091,8 @@ $$;
 ```
 
 ---
+
+<div style="break-after: page;"></div>
 
 ## 6. Widoki
 
@@ -1016,6 +1132,10 @@ CREATE VIEW public.view_hotel_occupancy AS
    FROM public.rooms;
 ```
 
+---
+
+<div style="break-after: page;"></div>
+
 ### view_revenue_report
 
 Raport finansowy z podziałem na miesiące.
@@ -1049,6 +1169,10 @@ CREATE OR REPLACE VIEW public.view_guest_history AS
   GROUP BY guests.guest_id;
 ```
 
+---
+
+<div style="break-after: page;"></div>
+
 ### view_current_reservations
 
 Obecne rezerwacje
@@ -1069,8 +1193,10 @@ CREATE VIEW public.view_current_reservations AS
    FROM ((public.reservations r
      JOIN public.guests g ON ((r.guest_id = g.guest_id)))
      JOIN public.rooms ro ON ((r.room_id = ro.room_id)))
+  WHERE (((r.reservation_status)::text = 'checked_in'::text) OR ((r.reservation_status)::text = 'confirmed'::text))
   ORDER BY r.check_in_date DESC;
 ```
+
 
 ### view_upcoming_checkouts
 
@@ -1089,4 +1215,31 @@ CREATE VIEW public.view_upcoming_checkouts AS
      JOIN public.guests ON ((reservations.guest_id = guests.guest_id)))
      JOIN public.rooms ON ((reservations.room_id = rooms.room_id)))
   WHERE ((reservations.check_out_date >= CURRENT_DATE) AND (reservations.check_out_date <= (CURRENT_DATE + '3 days'::interval)) AND ((reservations.reservation_status)::text = 'in_progress'::text));
+```
+
+---
+
+<div style="break-after: page;"></div>
+
+### view_all_reservations
+
+Zwraca wszystkie rezerwacje
+
+#### Definicja
+
+```SQL
+CREATE VIEW public.view_all_reservations AS
+ SELECT r.reservation_id,
+    r.guest_id,
+    (((g.first_name)::text || ' '::text) || (g.last_name)::text) AS guest_name,
+    ro.room_number,
+    r.check_in_date,
+    r.check_out_date,
+    r.reservation_status,
+    r.total_cost,
+    r.number_of_guests
+   FROM ((public.reservations r
+     JOIN public.guests g ON ((r.guest_id = g.guest_id)))
+     JOIN public.rooms ro ON ((r.room_id = ro.room_id)))
+  ORDER BY r.check_in_date DESC;
 ```
